@@ -14,6 +14,7 @@ import time
 import psycopg2
 import os
 from urllib.parse import urlparse
+import socket
 
 def wait_for_db():
     db_url = os.environ.get('DATABASE_URL')
@@ -23,15 +24,24 @@ def wait_for_db():
     
     try:
         parsed_url = urlparse(db_url)
+        # Resolve host to IPv4 address
+        host = parsed_url.hostname
+        try:
+            hostaddr = socket.getaddrinfo(host, None, socket.AF_INET)[0][4][0]
+        except socket.gaierror as e:
+            print(f"Failed to resolve host {host} to IPv4: {str(e)}")
+            sys.exit(1)
+        
         db_params = {
-            'host': parsed_url.hostname,
+            'host': host,
+            'hostaddr': hostaddr,  # Force IPv4
             'port': parsed_url.port or 5432,
             'user': parsed_url.username,
             'password': parsed_url.password,
             'dbname': parsed_url.path.lstrip('/'),
             'sslmode': 'require'  # Required for Supabase
         }
-        print(f"Attempting to connect to database: host={db_params['host']}, port={db_params['port']}, dbname={db_params['dbname']}")
+        print(f"Attempting to connect to database: host={db_params['host']}, hostaddr={db_params['hostaddr']}, port={db_params['port']}, dbname={db_params['dbname']}")
         
         max_attempts = 30
         attempt = 1
