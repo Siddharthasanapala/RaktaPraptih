@@ -6,8 +6,7 @@ services:
     plan: free
     buildCommand: |
       pip install -r requirements.txt
-    startCommand: |
-      /bin/sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:$PORT RaktaPraptih.wsgi:application"
+    startCommand: ./start.sh
     envVars:
       - key: SECRET_KEY
         generateValue: true
