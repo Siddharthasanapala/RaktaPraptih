@@ -15,16 +15,24 @@ import psycopg2
 import os
 
 def wait_for_db():
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        print("DATABASE_URL not set. Exiting...")
+        sys.exit(1)
+    
+    parsed_url = urlparse(db_url)
+    db_params = {
+        'host': parsed_url.hostname,
+        'port': parsed_url.port or 5432,
+        'user': parsed_url.username,
+        'password': parsed_url.password,
+        'dbname': parsed_url.path.lstrip('/')
+    }
+    
     db_conn = None
     while not db_conn:
         try:
-            db_conn = psycopg2.connect(
-                host=os.environ.get('DB_HOST', 'localhost'),
-                port=os.environ.get('DB_PORT', '5432'),
-                user=os.environ.get('DB_USER', 'postgres'),
-                password=os.environ.get('DB_PASSWORD', ''),
-                dbname=os.environ.get('DB_NAME', 'postgres')
-            )
+            db_conn = psycopg2.connect(**db_params)
         except psycopg2.OperationalError:
             print('Database unavailable, waiting 1 second...')
             time.sleep(1)
@@ -57,7 +65,6 @@ create_superuser() {
 import os
 from django.contrib.auth.models import User
 
-username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
 email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
 password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
