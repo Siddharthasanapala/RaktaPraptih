@@ -21,24 +21,36 @@ def wait_for_db():
         print("DATABASE_URL not set. Exiting...")
         sys.exit(1)
     
-    parsed_url = urlparse(db_url)
-    db_params = {
-        'host': parsed_url.hostname,
-        'port': parsed_url.port or 5432,
-        'user': parsed_url.username,
-        'password': parsed_url.password,
-        'dbname': parsed_url.path.lstrip('/')
-    }
-    
-    db_conn = None
-    while not db_conn:
-        try:
-            db_conn = psycopg2.connect(**db_params)
-        except psycopg2.OperationalError:
-            print('Database unavailable, waiting 1 second...')
-            time.sleep(1)
-    
-    print('Database available!')
+    try:
+        parsed_url = urlparse(db_url)
+        db_params = {
+            'host': parsed_url.hostname,
+            'port': parsed_url.port or 5432,
+            'user': parsed_url.username,
+            'password': parsed_url.password,
+            'dbname': parsed_url.path.lstrip('/'),
+            'sslmode': 'require'  # Required for Supabase
+        }
+        print(f"Attempting to connect to database: host={db_params['host']}, port={db_params['port']}, dbname={db_params['dbname']}")
+        
+        max_attempts = 30
+        attempt = 1
+        db_conn = None
+        while not db_conn and attempt <= max_attempts:
+            try:
+                db_conn = psycopg2.connect(**db_params)
+                print('Database available!')
+                db_conn.close()
+            except psycopg2.OperationalError as e:
+                print(f'Database unavailable, attempt {attempt}/{max_attempts}: {str(e)}')
+                time.sleep(1)
+                attempt += 1
+        if not db_conn:
+            print(f"Failed to connect to database after {max_attempts} attempts. Exiting...")
+            sys.exit(1)
+    except Exception as e:
+        print(f"Error parsing DATABASE_URL or connecting to database: {str(e)}")
+        sys.exit(1)
 
 wait_for_db()
 END

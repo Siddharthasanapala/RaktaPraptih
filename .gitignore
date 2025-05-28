@@ -173,3 +173,5 @@ Thumbs.db
 # Coverage reports
 bandit-report.json
 trivy-results.sarif
+
+test.py
