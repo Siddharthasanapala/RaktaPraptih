@@ -46,13 +46,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command:
-      - /bin/sh
-      - -c
-      - |
-        python manage.py migrate &&
-        python manage.py collectstatic --noinput &&
-        gunicorn --bind 0.0.0.0:8000 RaktaPraptih.wsgi:application
+    command: /app/start.sh
 
 volumes:
   postgres_data:
