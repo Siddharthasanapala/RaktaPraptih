@@ -25,12 +25,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Create staticfiles directory
-RUN mkdir -p /app/staticfiles
+RUN mkdir -p /app/staticfiles /app/media /app/static
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+RUN chmod +x /app/scripts/start.sh
 
-# Create a non-root user
 RUN adduser --disabled-password --gecos '' appuser
 RUN chown -R appuser:appuser /app
 USER appuser
@@ -38,5 +36,5 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "RaktaPraptih.wsgi:application"]
+# Use startup script as entrypoint
+ENTRYPOINT ["/app/scripts/start.sh"]
