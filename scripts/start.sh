@@ -13,6 +13,7 @@ import sys
 import time
 import psycopg2
 import os
+from urllib.parse import urlparse
 
 def wait_for_db():
     db_url = os.environ.get('DATABASE_URL')
@@ -65,6 +66,7 @@ create_superuser() {
 import os
 from django.contrib.auth.models import User
 
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
 email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
 password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
@@ -79,10 +81,8 @@ END
 
 # Main execution
 main() {
-    # Wait for database (only if using PostgreSQL)
-    if [ "$DATABASE_URL" ] || [ "$DB_HOST" ]; then
-        wait_for_db
-    fi
+    # Wait for database
+    wait_for_db
     
     # Run migrations
     run_migrations
