@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ siddhu ]
 
+# Add permissions at the workflow level for all jobs
+permissions:
+  actions: read        # Required to access workflow context
+  contents: read       # Required to checkout repository
+  security-events: write  # Required to upload SARIF files to Security tab
+
 env:
   PYTHON_VERSION: 3.11
 
@@ -125,7 +131,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.30.0  # Pin to a stable version
       with:
         scan-type: 'fs'
         scan-ref: '.'
@@ -133,6 +139,6 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3  # Update to v3
       with:
         sarif_file: 'trivy-results.sarif'
