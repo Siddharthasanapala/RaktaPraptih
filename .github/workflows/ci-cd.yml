@@ -70,6 +70,8 @@ jobs:
         bandit -r . -x ./tests/,./venv/
 
     - name: Check for security vulnerabilities
+      env:
+        SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
       run: |
         # Temporarily ignore vulnerability 66963 (djangorestframework-simplejwt CVE-2024-22513)
         # TODO: Revisit this after assessing the vulnerability impact or when a fix is available
@@ -86,7 +88,7 @@ jobs:
         coverage report
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: actions/codecov-action@v3
       with:
         file: ./coverage.xml
         flags: unittests
