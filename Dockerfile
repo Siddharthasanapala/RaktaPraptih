@@ -27,25 +27,10 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy project
 COPY . /app/
 
-# Create non-root user
-RUN adduser --disabled-password --gecos '' appuser
-
-# Create necessary directories and set permissions
-RUN mkdir -p /app/staticfiles /app/media \
-    && chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
-
-# Collect static files
-RUN python manage.py collectstatic --noinput --settings=RaktaPraptih.settings.production || echo "Static files collection failed, continuing..."
+COPY start.sh .
+RUN chmod +x start.sh
 
 # Expose port
-EXPOSE 8000
+EXPOSE 10000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health/', timeout=10)" || exit 1
-
-# Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "RaktaPraptih.wsgi:application"]
+CMD ["./start.sh"]
