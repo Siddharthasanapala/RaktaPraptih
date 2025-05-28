@@ -1,0 +1,555 @@
+{% extends 'base.html' %}
+{% load my_tags %}
+
+{% block content %}
+    <style>
+        * ,body{
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0;
+            background: transparent;
+            border-radius: 0;
+            backdrop-filter: none;
+            box-shadow: none;
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .headersection {
+            background: linear-gradient(135deg, #dc2626, #b91c1c, #991b1b);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .headersection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .headersection h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .headersection .subtitlesection {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 3px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 0;
+        }
+
+        .filter-container {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            animation: fadeIn 1s ease-in;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+        }
+
+        .filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+}
+
+        .input-group {
+            position: relative;
+        }
+
+        .search-input, .filter-select {
+            padding: 12px 18px;
+            border: 2px solid #fca5a5;
+            border-radius: 25px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .search-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            transition: all 0.3s ease-in-out;
+        }
+
+        th {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: white;
+            padding: 10px 8px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 8px 6px;
+            text-align: center;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.3s ease;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        tbody tr:nth-child(even) {
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.2);
+        }
+
+        /* Blood Level Color Classes with Animations */
+        .red {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            color: #991b1b;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .red::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .yellow {
+            background: linear-gradient(135deg, #fefce8, #fef3c7);
+            color: #92400e;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .yellow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .green {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #166534;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .green::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .blood-drop {
+            display: inline-block;
+            margin-right: 5px;
+            color: #dc2626;
+            animation: dropPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dropPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-radius: 8px;
+            animation: fadeIn 1s ease-in 0.5s both;
+        }
+
+        .pagination a, .pagination span {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+        }
+
+        .pagination a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+        }
+
+        .pagination span {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input, .filter-select {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .headersection {
+                padding: 10px;
+            }
+            
+            .headersection h1 {
+                font-size: 1.2rem;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 700px;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 0.75rem;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headersection h1 {
+                font-size: 1.1rem;
+            }
+            
+            th, td {
+                padding: 4px 3px;
+                font-size: 0.7rem;
+            }
+            
+            .search-input, .filter-select, .search-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blood-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #fecaca;
+            border-left: 4px solid #dc2626;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+       
+
+.search-input, .filter-select {
+    width: 100%;
+}
+    </style>
+    
+    <script>
+        function goToBloodBank(id) {
+            // Add loading effect
+            document.querySelector('.table-container').style.opacity = '0.7';
+            window.location.href = '/bloodbank/' + id + '/';
+        }
+
+        // Add smooth scroll and enhanced interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add blood drop icons to blood type headers
+            const bloodHeaders = document.querySelectorAll('th');
+            bloodHeaders.forEach((header, index) => {
+                if (index > 1) { // Skip name and place columns
+                    header.innerHTML = '<i class="fas fa-tint blood-drop"></i>' + header.innerHTML;
+                }
+            });
+
+            // Add hover effects to table rows
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Add form submission loading
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    const loading = document.querySelector('.loading');
+                    if (loading) {
+                        loading.style.display = 'block';
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="blood-bank-content">
+        <div class="container">
+        <div class="headersection">
+            <h1><i class="fas fa-heartbeat"></i> Blood Bank Directory</h1>
+            <div class="subtitlesection">Welcome, {{ request.session.username|default:"Guest" }}</div>
+        </div>
+        
+        <div class="content">
+            <!-- Search and Filter Section -->
+            <div class="filter-container animate__animated animate__fadeIn">
+                <form method="get" action="{% url 'home' %}" class="filter-form">
+                    <div class="input-group">
+                        <input type="text" name="q" class="search-input" placeholder="🔍 Search for..." value="{{ search_query }}">
+                    </div>
+                    <div class="input-group">
+                        <select name="place" class="filter-select">
+                            <option value="">📍 All Locations</option>
+                            {% for place in unique_places %}
+                                <option value="{{ place }}" {% if place == selected_place %}selected{% endif %}>{{ place }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i> Search & Filter
+                    </button>
+                </form>
+            </div>
+            
+            <div class="loading">
+                <div class="blood-spinner"></div>
+                <p>Loading blood bank data...</p>
+            </div>
+            
+            <!-- Blood Bank Data Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hospital"></i> Blood Bank Name</th>
+                            <th><i class="fas fa-map-marker-alt"></i> Location</th>
+                            <th>A+</th>
+                            <th>A-</th>
+                            <th>B+</th>
+                            <th>B-</th>
+                            <th>O+</th>
+                            <th>O-</th>
+                            <th>AB+</th>
+                            <th>AB-</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bloodbank in page_obj %}
+                            {% with bloods=bloodbank.bloodbankbloods %}
+                            <tr onclick="goToBloodBank({{ bloodbank.id }})" title="Click to view details">
+                                <td><strong>{{ bloodbank.owner_name }}</strong></td>
+                                <td>{{ bloodbank.address }}</td>
+                                {% for field in blood_fields %}
+                                    {% with value=bloods|getattr_value:field %}
+                                    <td class="{% if value < 3 %}red{% elif value >= 4 and value <= 7 %}yellow{% elif value > 7 %}green{% endif %}">
+                                        <strong>{{ value }}</strong>
+                                        {% if value < 3 %}
+                                            <i class="fas fa-exclamation-triangle" style="color: #dc2626; margin-left: 5px;" title="Low stock"></i>
+                                        {% elif value > 7 %}
+                                            <i class="fas fa-check-circle" style="color: #16a34a; margin-left: 5px;" title="Good stock"></i>
+                                        {% endif %}
+                                    </td>
+                                    {% endwith %}
+                                {% endfor %}
+                            </tr>
+                            {% endwith %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="10" class="no-data">
+                                    <i class="fas fa-search" style="font-size: 2rem; color: #dc2626; margin-bottom: 10px;"></i>
+                                    <br>No blood banks found matching your criteria
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination Links -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&place={{ selected_place }}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                {% endif %}
+                
+                <span>
+                    <i class="fas fa-file-medical"></i> 
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&place={{ selected_place }}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

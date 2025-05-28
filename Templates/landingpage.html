@@ -1,0 +1,834 @@
+{% extends 'base.html' %}
+{% load my_tags %}
+
+{% block title %}Be Someone's Hero Today - Blood Donation{% endblock %}
+
+{% block content %}
+<style>
+        * ,body{
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --blood-red: #8B0000;
+            --dark-red: #660000;
+            --light-red: #B22222;
+            --accent-red: #DC143C;
+            --white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --shadow: rgba(139, 0, 0, 0.3);
+            --gradient-red: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Landing Page Styles */
+        .landing-container {
+            width: 100%;
+            max-width: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            background: var(--gradient-red);
+            color: var(--white);
+            padding: 4rem 0;
+            text-align: center;
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: heroAnimation 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroAnimation {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: slideInDown 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+            font-weight: 300;
+            animation: slideInUp 1s ease-out 0.3s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInScale 1s ease-out 0.6s both;
+        }
+
+        .cta-button {
+            background: var(--white);
+            color: var(--blood-red);
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139,0,0,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+            background: var(--light-gray);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .cta-secondary:hover {
+            background: var(--white);
+            color: var(--blood-red);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--white);
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            margin: 2rem;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--light-gray) 0%, var(--white) 100%);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-red);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(139,0,0,0.15);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--blood-red);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        /* Impact Section */
+        .impact-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, rgba(139,0,0,0.05) 0%, rgba(220,20,60,0.05) 100%);
+            margin-bottom: 3rem;
+            border-radius: 20px;
+            margin: 2rem;
+        }
+
+        .impact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .impact-title {
+            font-size: 2.5rem;
+            color: var(--blood-red);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .impact-subtitle {
+            font-size: 1.2rem;
+            color: var(--dark-gray);
+            margin-bottom: 3rem;
+            opacity: 0.8;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .impact-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .impact-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(220,20,60,0.05) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.4s ease;
+        }
+
+        .impact-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(139,0,0,0.15);
+        }
+
+        .impact-card:hover::before {
+            transform: scale(1);
+        }
+
+        .impact-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--white);
+            position: relative;
+            z-index: 2;
+        }
+
+        .impact-card-title {
+            font-size: 1.3rem;
+            color: var(--blood-red);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .impact-card-text {
+            color: var(--dark-gray);
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Call to Action Section */
+        .final-cta {
+            background: var(--gradient-red);
+            color: var(--white);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 20px;
+            margin: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: ctaAnimation 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes ctaAnimation {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .final-cta-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .final-cta-title {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .final-cta-text {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+        }
+
+        .final-cta-button {
+            background: var(--white);
+            color: var(--blood-red);
+            padding: 1.2rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(139,0,0,0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .final-cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .final-cta-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Floating Elements */
+        .floating-hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            color: rgba(220,20,60,0.6);
+            font-size: 1.5rem;
+            animation: floatHeart 8s linear infinite;
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Animation Classes */
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cta-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .impact-title {
+                font-size: 2rem;
+            }
+
+            .impact-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .impact-card {
+                padding: 2rem;
+            }
+
+            .final-cta-title {
+                font-size: 2.2rem;
+            }
+
+            .final-cta-text {
+                font-size: 1.1rem;
+            }
+
+            .final-cta-button {
+                padding: 1rem 2.5rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 3rem 0;
+            }
+
+            .hero-content {
+                padding: 0 1rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .stats-section,
+            .impact-section,
+            .final-cta {
+                margin: 1rem;
+                padding: 2rem 1rem;
+            }
+
+            .impact-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .final-cta-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High Contrast */
+        @media (prefers-contrast: high) {
+            .stat-card,
+            .impact-card {
+                border: 2px solid var(--blood-red);
+            }
+        }
+    </style>
+
+<div class="landing-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-bg"></div>
+        <div class="floating-hearts">
+            <span class="heart" style="left: 10%; animation-delay: 0s;">❤️</span>
+            <span class="heart" style="left: 20%; animation-delay: 2s;">💝</span>
+            <span class="heart" style="left: 30%; animation-delay: 4s;">❤️</span>
+            <span class="heart" style="left: 40%; animation-delay: 1s;">💖</span>
+            <span class="heart" style="left: 50%; animation-delay: 3s;">❤️</span>
+            <span class="heart" style="left: 60%; animation-delay: 5s;">💝</span>
+            <span class="heart" style="left: 70%; animation-delay: 2.5s;">❤️</span>
+            <span class="heart" style="left: 80%; animation-delay: 4.5s;">💖</span>
+            <span class="heart" style="left: 90%; animation-delay: 1.5s;">❤️</span>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Be Someone's Hero Today</h1>
+            <p class="hero-subtitle">Your single drop of blood can save up to three lives. Join thousands of heroes who donate blood regularly and make a difference in someone's life.</p>
+            <div class="hero-cta">
+                <a href="{% url 'donor_signup' %}" class="cta-button">Donate Now ❤️</a>
+                <a href="{% url 'bloodbank_signup' %}" class="cta-button cta-secondary">Register Blood Bank</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number" data-count="5000+">0</span>
+                    <span class="stat-label">Lives Saved</span>
+                </div>
+<div class="stat-card">
+                   <span class="stat-number" data-count={{donors_count}}>0</span>
+                   <span class="stat-label">Active Donors</span>
+               </div>
+               <div class="stat-card">
+                   <span class="stat-number" data-count={{bloodbanks_count}}>0</span>
+                   <span class="stat-label">Blood Banks Connected</span>
+               </div>
+               <div class="stat-card">
+                   <span class="stat-number" data-count="24">0</span>
+                   <span class="stat-label">Hours Support</span>
+               </div>
+           </div>
+       </div>
+   </section>
+
+   <!-- Impact Section -->
+   <section class="impact-section">
+       <div class="impact-container">
+           <h2 class="impact-title">Your Impact Matters</h2>
+           <p class="impact-subtitle">Every donation makes a real difference in someone's life. Here's how your contribution helps:</p>
+           
+           <div class="impact-grid">
+               <div class="impact-card">
+                   <div class="impact-icon">🏥</div>
+                   <h3 class="impact-card-title">Emergency Care</h3>
+                   <p class="impact-card-text">Your blood donation helps accident victims and emergency patients get the immediate care they need to survive critical situations.</p>
+               </div>
+               <div class="impact-card">
+                   <div class="impact-icon">👶</div>
+                   <h3 class="impact-card-title">Newborn Support</h3>
+                   <p class="impact-card-text">Premature babies and children with blood disorders depend on donations to grow healthy and strong.</p>
+               </div>
+               <div class="impact-card">
+                   <div class="impact-icon">🎗️</div>
+                   <h3 class="impact-card-title">Cancer Treatment</h3>
+                   <p class="impact-card-text">Cancer patients undergoing chemotherapy rely on blood transfusions to continue their fight against the disease.</p>
+               </div>
+               <div class="impact-card">
+                   <div class="impact-icon">⚕️</div>
+                   <h3 class="impact-card-title">Surgery Support</h3>
+                   <p class="impact-card-text">Major surgeries and organ transplants require blood products to ensure successful procedures and recovery.</p>
+               </div>
+               <div class="impact-card">
+                   <div class="impact-icon">🤱</div>
+                   <h3 class="impact-card-title">Maternal Care</h3>
+                   <p class="impact-card-text">Mothers experiencing complications during childbirth depend on blood donations for safe deliveries.</p>
+               </div>
+               <div class="impact-card">
+                   <div class="impact-icon">🩸</div>
+                   <h3 class="impact-card-title">Blood Disorders</h3>
+                   <p class="impact-card-text">Patients with blood disorders like sickle cell disease need regular transfusions to manage their condition.</p>
+               </div>
+           </div>
+       </div>
+   </section>
+
+   <!-- Final Call to Action -->
+   <section class="final-cta">
+       <div class="final-cta-content">
+           <h2 class="final-cta-title">Ready to Save Lives?</h2>
+           <p class="final-cta-text">Join our community of life-savers. It takes just 5 minutes of your time, but the impact lasts a lifetime. Schedule your appointment today and become someone's hero.</p>
+           <a href="{% url 'donor_signup' %}" class="final-cta-button">Start Your Hero Journey</a>
+       </div>
+   </section>
+</div>
+
+<script>
+        // Number counting animation
+        function animateNumbers() {
+            const numbers = document.querySelectorAll('.stat-number');
+            
+            const observerOptions = {
+                threshold: 0.5,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = entry.target;
+                        const finalNumber = parseInt(target.dataset.count);
+                        animateNumber(target, finalNumber);
+                        observer.unobserve(target);
+                    }
+                });
+            }, observerOptions);
+            
+            numbers.forEach(number => observer.observe(number));
+        }
+        
+        function animateNumber(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 20);
+        }
+
+        // Floating hearts animation
+        function createFloatingHeart() {
+            const heart = document.createElement('span');
+            heart.className = 'heart';
+            heart.innerHTML = ['❤️', '💝', '💖', '💗'][Math.floor(Math.random() * 4)];
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            heart.style.animationDelay = Math.random() * 2 + 's';
+            
+            const container = document.querySelector('.floating-hearts');
+            if (container) {
+                container.appendChild(heart);
+                
+                setTimeout(() => {
+                    heart.remove();
+                }, 8000);
+            }
+        }
+
+        // Create hearts periodically
+        setInterval(createFloatingHeart, 2000);
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll-triggered animations
+        function addScrollAnimations() {
+            const animatedElements = document.querySelectorAll('.impact-card, .stat-card');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            animatedElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s ease';
+                observer.observe(el);
+            });
+        }
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            animateNumbers();
+            addScrollAnimations();
+            
+            // Add click effects to buttons
+            document.querySelectorAll('.cta-button, .final-cta-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.background = 'rgba(255,255,255,0.6)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.pointerEvents = 'none';
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Add ripple animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+{% endblock %}

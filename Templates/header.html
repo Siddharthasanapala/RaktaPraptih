@@ -1,0 +1,534 @@
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --blood-red: #8B0000;
+            --dark-red: #660000;
+            --light-red: #B22222;
+            --accent-red: #DC143C;
+            --white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --shadow: rgba(139, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--blood-red) 0%, var(--dark-red) 100%);
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s ease;
+            border-bottom: 2px solid var(--accent-red);
+        }
+
+        .header.scrolled {
+            background: rgba(139, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px var(--shadow);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            height: 80px;
+            transition: height 0.3s ease;
+        }
+
+        .header.scrolled .header-container {
+            height: 70px;
+        }
+
+        /* Logo Section */
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--white);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+            background: linear-gradient(45deg, var(--accent-red), var(--light-red));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(360deg);
+            box-shadow: 0 6px 20px rgba(220, 20, 60, 0.5);
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 12px 20px;
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent-red);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link:hover::before {
+            width: 80%;
+        }
+
+        .nav-link.active {
+            background: rgba(220, 20, 60, 0.2);
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        .nav-link.active::before {
+            width: 80%;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-red), var(--light-red));
+            color: var(--white);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(220, 20, 60, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-toggle span {
+            width: 25px;
+            height: 3px;
+            background: var(--white);
+            margin: 3px 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .mobile-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .mobile-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--blood-red) 0%, var(--dark-red) 100%);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .mobile-menu.active {
+            max-height: 400px;
+        }
+
+        .mobile-nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+            margin: 0;
+        }
+
+        .mobile-nav-item {
+            margin: 0;
+        }
+
+        .mobile-nav-link {
+            display: block;
+            padding: 15px 2rem;
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .mobile-nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent-red);
+            padding-left: 2.5rem;
+        }
+
+        .mobile-cta {
+            margin: 1rem 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 0 1rem;
+                height: 70px;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .logo-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+
+            .nav-menu,
+            .cta-button {
+                display: none;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-container {
+                padding: 0 1rem;
+                height: 65px;
+            }
+
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+                margin-right: 8px;
+            }
+        }
+
+        /* Animation for page load */
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header {
+            animation: slideDown 0.6s ease-out;
+        }
+
+        /* Content spacing for fixed header */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        .demo-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .demo-section {
+            background: white;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+    <header class="header" id="header">
+        <div class="header-container">
+            <!-- Logo -->
+            <a href="/" class="logo">
+                <div class="logo-icon">R</div>
+                <span>Rakta-Praptih </span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="nav">
+                <ul class="nav-menu">
+      
+                    <li class="nav-item">
+                        <a href="/bloodbanks/" class="nav-link">BloodBanks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/donors/" class="nav-link">Donors</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.is_donor %}
+                            <li class="nav-item">
+                                <a href="/donors/{{ donor_id }}/" class="nav-link">User Account</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a href="/bloodbank/{{ bloodbank_id }}/" class="nav-link">User Account</a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a href="/signup/bloodbank/" class="nav-link">Blood Bank Signup</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/signup/donor/" class="nav-link">Donor Signup</a>
+                        </li>                       
+                    {% endif %}
+                </ul>
+                {% if user.is_authenticated %}
+                    <a href="/logout/" class="cta-button">Logout</a>
+                {% else %}
+                    <a href="/login/" class="cta-button">Login</a>
+                {% endif %}
+            </nav>
+
+            <!-- Mobile Menu Toggle -->
+            <div class="mobile-toggle" id="mobileToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <ul class="mobile-nav-menu">
+                {% comment %} <li class="mobile-nav-item">
+                    <a href="/" class="mobile-nav-link">Home</a>
+                </li> {% endcomment %}
+                <li class="mobile-nav-item">
+                    <a href="/bloodbanks/" class="mobile-nav-link">BloodBanks</a>
+                </li>
+                <li class="mobile-nav-item">
+                    <a href="/donors/" class="mobile-nav-link">Donors</a>
+                </li>
+                {% if user.is_authenticated %}
+                    {% if user.is_donor %}
+                        <li class="mobile-nav-item">
+                            <a href="/donors/{{ donor_id }}/" class="mobile-nav-link">User Account</a>
+                        </li>
+                    {% else %}
+                        <li class="mobile-nav-item">
+                            <a href="/bloodbank/{{ bloodbank_id }}/" class="mobile-nav-link">User Account</a>
+                        </li>
+                    {% endif %}
+                    <li class="mobile-nav-item">
+                        <a href="/logout/" class="mobile-nav-link">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="mobile-nav-item">
+                        <a href="/signup/bloodbank/" class="mobile-nav-link">Blood Bank Signup</a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="/signup/donor/" class="mobile-nav-link">Donor Signup</a>
+                    </li>   
+                    <li class="mobile-nav-item">
+                        <a href="/login/" class="mobile-nav-link">Login</a>
+                    </li>                      
+                {% endif %}
+            </ul>
+            {% comment %} <div class="mobile-cta">
+                {% if user.is_authenticated %}
+                    <a href="/logout/" class="cta-button">Logout</a>
+                {% else %}
+                    <a href="/login/" class="cta-button">Login</a>
+                {% endif %}
+            </div> {% endcomment %}
+        </div>
+    </header>
+
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileToggle.addEventListener('click', function() {
+            mobileToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking on a link
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+            });
+        });
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        const currentPath = window.location.pathname;
+
+        navLinks.forEach(link => {
+        const linkPath = new URL(link.href).pathname;
+
+            if (linkPath === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        function openModal() {
+            document.getElementById("signupModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("signupModal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            var modal = document.getElementById("signupModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    </script>

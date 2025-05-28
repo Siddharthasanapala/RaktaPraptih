@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  /* Reset and base styles */
+  * , body{
+    margin: 0;
+    padding: 0;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  /* Main container */
+  .blood-request-container {
+    min-height: 100vh;
+    background: white;
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Animated background elements */
+  .blood-request-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(139, 0, 0, 0.3) 0%, transparent 70%);
+    animation: pulse 8s ease-in-out infinite alternate;
+  }
+
+  /* Floating blood drops animation */
+  .blood-drops {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .blood-drop {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: linear-gradient(45deg, #8B0000, #A0001C);
+    animation: float 6s ease-in-out infinite;
+    opacity: 0.6;
+  }
+
+  .blood-drop:nth-child(1) { left: 10%; animation-delay: 0s; }
+  .blood-drop:nth-child(2) { left: 20%; animation-delay: 1s; }
+  .blood-drop:nth-child(3) { left: 30%; animation-delay: 2s; }
+  .blood-drop:nth-child(4) { left: 70%; animation-delay: 3s; }
+  .blood-drop:nth-child(5) { left: 80%; animation-delay: 4s; }
+  .blood-drop:nth-child(6) { left: 90%; animation-delay: 5s; }
+
+  /* Modal content styling */
+  .modal-content {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 
+      0 25px 50px rgba(74, 0, 18, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    transform: translateY(0);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .modal-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+      0 35px 70px rgba(74, 0, 18, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  /* Header styling */
+  .modal-content h2 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 700;
+    color:rgb(114, 0, 0);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    position: relative;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    line-height: 1.3;
+  }
+
+ 
+
+  /* Donor info container */
+  .donor-info-container {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .donor-info-card {
+    position: relative;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 16px;
+    padding: 0.5rem;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .donor-info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 30px rgba(139, 0, 0, 0.2),
+      0 0 0 2px rgba(139, 0, 0, 0.3);
+    background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+  }
+
+  .donor-info-label {
+    display: block;
+    font-weight: 600;
+    color:rgb(4, 4, 4);
+    margin-bottom: 0.4rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+
+  .donor-info-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #2d3436;
+    background: rgba(139, 0, 0, 0.05);
+    padding: 0.5rem 0.6rem;
+    border-radius: 12px;
+    border: 2px solid rgba(139, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+  }
+
+  .donor-info-value:hover {
+    background: rgba(139, 0, 0, 0.1);
+    border-color: rgba(139, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* Special styling for blood type */
+  .blood-type-value {
+    background: linear-gradient(135deg, #8B0000 0%, #A0001C 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-align: center;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .blood-type-value:hover {
+    background: linear-gradient(135deg, #A0001C 0%, #8B0000 100%);
+    box-shadow: 0 4px 15px rgba(139, 0, 0, 0.4);
+  }
+
+  /* Submit button styling */
+  .update-btn {
+    width: 100%;
+    padding: 1.2rem 2rem;
+    background: linear-gradient(135deg, #8B0000 0%, #A0001C 50%, #800020 100%);
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 8px 25px rgba(139, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .update-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s;
+  }
+
+  .update-btn:hover::before {
+    left: 100%;
+  }
+
+  .update-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 12px 35px rgba(139, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .update-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(139, 0, 0, 0.4);
+  }
+
+  /* Request icon animation */
+  .request-icon {
+    display: inline-block;
+    margin-right: 10px;
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+
+  /* Animations */
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes pulse {
+    0% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 0.8; transform: scale(1.05); }
+  }
+
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 0;
+    }
+    10%, 90% {
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(-10vh) rotate(180deg);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .animate__animated.animate__fadeIn {
+    animation: fadeIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .blood-request-container {
+      padding: 1rem 0.5rem;
+      min-height: 100vh;
+    }
+
+    .modal-content {
+      padding: 2.5rem 2rem;
+      margin: 1rem;
+      border-radius: 20px;
+      max-width: 100%;
+    }
+
+    .modal-content h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+
+    .donor-info-container {
+      gap: 0.5rem;
+    }
+
+    .donor-info-card {
+      padding: 1rem;
+      border-radius: 12px;
+    }
+
+    .donor-info-value {
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      min-height: 45px;
+    }
+
+    .blood-type-value {
+      font-size: 1.2rem;
+    }
+
+    .update-btn {
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .blood-request-container {
+      padding: 0.5rem;
+    }
+
+    .modal-content {
+      padding: 1.2rem 0.8rem;
+      margin: 0.5rem;
+      border-radius: 16px;
+    }
+
+    .modal-content h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .donor-info-card {
+      padding: 0.8rem;
+    }
+
+    .donor-info-label {
+      font-size: 0.8rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .donor-info-value {
+      font-size: 0.95rem;
+      padding: 0.7rem 0.9rem;
+      min-height: 40px;
+    }
+
+    .blood-type-value {
+      font-size: 1.1rem;
+    }
+
+    .update-btn {
+      padding: 0.9rem 1.2rem;
+      font-size: 0.95rem;
+    }
+  }
+
+  /* High DPI screens */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .modal-content {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  /* Landscape orientation on mobile */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .blood-request-container {
+      padding: 0.5rem;
+    }
+    
+    .modal-content {
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .blood-request-container {
+      background: white !important;
+    }
+    
+    .modal-content {
+      box-shadow: none !important;
+      background: white !important;
+    }
+  }
+  .error-message {
+      background: linear-gradient(135deg, #f8d7da, #f1b0b7);
+      color: #721c24;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid #dc3545;
+      animation: shake 0.8s ease-in-out;
+    }
+    .error-message ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .error-message li {
+      margin-bottom: 0.5rem;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .error-message li::before {
+      content: '⚠';
+      position: absolute;
+      left: 0;
+      color: #dc3545;
+    }
+</style>
+
+<div class="blood-request-container">
+  <!-- Floating blood drops background -->
+  <div class="blood-drops">
+    <div class="blood-drop"></div>
+    <div class="blood-drop"></div>
+    <div class="blood-drop"></div>
+    <div class="blood-drop"></div>
+    <div class="blood-drop"></div>
+    <div class="blood-drop"></div>
+  </div>
+
+  {% if show_update and donor.id %}
+    <form method="POST">
+      <div class="modal-content animate__animated animate__fadeIn">
+        <h2>Request a Blood Unit</h2>
+        {% if form.errors %}
+          <div class="error-message">
+            <strong>Errors:</strong>
+            <ul>
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {% csrf_token %}
+        <div class="donor-info-container">
+          {% for field, label in fields %}
+            <div class="donor-info-card">
+              <label class="donor-info-label">{{ label }} :</label>
+              {% if field == 'username' %}
+                <div class="donor-info-value">{{ donor.user.username }}</div>
+              {% elif field == 'date_of_birth' %}
+                <div class="donor-info-value">{{ donor.date_of_birth|date:"F d, Y" }}</div>
+              {% elif field == 'blood_type' %}
+                <div class="donor-info-value blood-type-value">{{ donor.blood_type }}</div>
+              {% elif field == 'gender' %}
+                <div class="donor-info-value">{{ donor.gender|capfirst }}</div>
+              {% elif field == 'address' %}
+                <div class="donor-info-value">{{ donor.address }}</div>
+              {% elif field == 'last_donation_date' %}
+                <div class="donor-info-value">
+                  {% if donor.last_donation_date %}
+                    {{ donor.last_donation_date|date:"F d, Y" }}
+                  {% else %}
+                    Never donated before
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="update-btn">
+          <span class="request-icon">💌</span>Send Request to Donor
+        </button>
+      </div>
+    </form>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,633 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding: 1rem;
+        }
+
+        /* Animated background elements */
+        .blood-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, #dc143c, #8b0000);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: floatParticle 8s linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .particle:nth-child(1) { left: 20%; width: 4px; height: 4px; animation-delay: 0s; animation-duration: 6s; }
+        .particle:nth-child(2) { left: 40%; width: 6px; height: 6px; animation-delay: 2s; animation-duration: 8s; }
+        .particle:nth-child(3) { left: 60%; width: 3px; height: 3px; animation-delay: 4s; animation-duration: 7s; }
+        .particle:nth-child(4) { left: 80%; width: 5px; height: 5px; animation-delay: 1s; animation-duration: 9s; }
+        .particle:nth-child(5) { left: 10%; width: 4px; height: 4px; animation-delay: 3s; animation-duration: 6s; }
+
+        /* Pulsing background effect */
+        .pulse-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 20%, rgba(220, 20, 60, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(255, 107, 107, 0.05) 0%, transparent 50%);
+            animation: pulseBackground 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes pulseBackground {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            text-align: center;
+            font-size: clamp(1rem, 6vw, 2.5rem);
+            color:rgb(6, 6, 6);
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+
+        @keyframes heartbeat {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.3); }
+        }
+
+        /* Filter Section */
+        .filter-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filter-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg,rgb(239, 212, 217),rgb(240, 221, 221),rgb(225, 140, 157), #ff6b6b);
+            border-radius: 20px;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-form input,
+        .filter-form select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #ffffff;
+        }
+
+        .filter-form input:focus,
+        .filter-form select:focus {
+            outline: none;
+            border-color:rgb(124, 2, 26);
+            box-shadow: 0 0 20px rgba(232, 133, 153, 0.29);
+            transform: translateY(-2px);
+        }
+
+        .filter-form button {
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #dc143c, #b91c1c);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .filter-form button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .filter-form button:hover::before {
+            left: 100%;
+        }
+
+        .filter-form button:hover {
+            background: linear-gradient(135deg, #b91c1c, #dc143c);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+        }
+
+        /* Table Styling */
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 0.3rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #dc143c, #b91c1c);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            position: relative;
+        }
+
+        th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b6b, #dc143c, #ff6b6b);
+        }
+
+        td {
+            padding: 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+            font-size: clamp(0.85rem, 2.2vw, 0.95rem);
+            color: #2c3e50;
+            position: relative;
+        }
+
+        tbody tr {
+            background: #ffffff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+         tbody tr:hover td {
+    background: linear-gradient(90deg, rgba(220, 20, 60, 0.05), rgba(255, 255, 255, 0.95));
+}
+
+
+        tbody tr:hover::before {
+            width: 100%;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(90deg, rgba(220, 20, 60, 0.05), rgba(255, 255, 255, 0.95));
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(220, 20, 60, 0.15);
+        }
+
+        tbody tr:hover td {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        /* Blood type styling */
+        .blood-type {
+            display: inline-block;
+            background: linear-gradient(135deg, #dc143c, #ff6b6b);
+            color: white;
+            padding: 0.3rem 0.4rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            animation: bloodPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes bloodPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Gender icons */
+        .gender-icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .male { color: #007bff; }
+        .female { color: #e91e63; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .pagination a {
+            color: #dc143c;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .pagination a:hover {
+            background: linear-gradient(135deg, #dc143c, #b91c1c);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 20, 60, 0.3);
+        }
+
+        .pagination span {
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .filter-form {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+            
+            .filter-form button {
+                grid-column: 1 / -1;
+                justify-self: center;
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+            
+            .filter-container,
+            .table-container {
+                padding: 0.2rem;
+                border-radius: 15px;
+            }
+            
+            .filter-form {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .filter-form button {
+                width: 100%;
+            }
+            
+            table {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 0.7rem 0.5rem;
+            }
+            
+            h1::before {
+                position: relative;
+                left: auto;
+                top: auto;
+                transform: none;
+                margin-right: 0.5rem;
+                display: inline-block;
+            }
+            
+            .pagination {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filter-form input,
+            .filter-form select,
+            .filter-form button {
+                font-size: 0.7rem;
+                padding: 0.4rem;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                padding: 0.4rem 0.3rem;
+                min-width: 100px;
+            }
+            
+            .blood-type {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.6rem;
+            }
+        }
+
+        /* High resolution displays */
+        @media (min-width: 1400px) {
+            .filter-container,
+            .table-container {
+                padding: 0.5rem;
+            }
+            
+            th, td {
+                padding: 0.4rem;
+            }
+        }
+
+        /* Dark mode media query */
+        @media (prefers-color-scheme: white) {
+            .filter-container,
+            .table-container,
+            .pagination {
+                background: rgba(30, 30, 30, 0.95);
+                color:rgb(255, 255, 255);
+            }
+            
+            tbody tr {
+                background: rgba(40, 40, 40, 0.8);
+            }
+            
+            td {
+                color: #e0e0e0;
+                border-bottom-color: #444;
+            }
+            
+            .filter-form input,
+            .filter-form select {
+                background: rgba(50, 50, 50, 0.8);
+                color: #ffffff;
+                border-color: #555;
+            }
+        }
+
+        /* Animation delays for staggered effect */
+        .animate__animated:nth-child(1) { animation-delay: 0.1s; }
+        .animate__animated:nth-child(2) { animation-delay: 0.2s; }
+        .animate__animated:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Scroll animations */
+        @keyframes slideInFromLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .filter-container {
+            animation: slideInFromLeft 0.8s ease-out;
+        }
+
+        .table-container {
+            animation: slideInFromLeft 0.8s ease-out 0.2s both;
+        }
+
+        .pagination {
+            animation: slideInFromLeft 0.8s ease-out 0.4s both;
+        }
+    </style>
+    <script>
+        function requestDonor(donor_id) {
+            window.location.href = '/donors/request/' + donor_id + '/';
+        }
+
+        // Add particles on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.querySelector('.blood-particles');
+            
+            // Create additional particles for more effect
+            for (let i = 6; i <= 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 4 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        });
+    </script>
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="pulse-bg"></div>
+    <div class="blood-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <h1 class="animate__animated animate__fadeInDown">Welcome {{ request.session.username|default:"Guest" }}😊</h1>
+        
+        <!-- Search and Filter Section -->
+        <div class="filter-container">
+            <form method="get" action="{% url 'donors_view' %}" class="filter-form">
+                <div>
+                    <input type="text" id="search" name="q" placeholder="Search for..." value="{{ search_query }}">
+                </div>
+                <div>
+                    <select id="place" name="place">
+                        <option value="">All Places</option>
+                        {% for place in unique_places %}
+                            <option value="{{ place }}" {% if place == selected_place %}selected{% endif %}>{{ place }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit">
+                    <i class="fas fa-filter" style="margin-right: 0.5rem;"></i>Apply Filters
+                </button>
+            </form>
+        </div>
+        
+        <!-- Donor Data Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            <i class="fas fa-user" style="margin-right: 0.5rem;"></i>Donor Name
+                        </th>
+                        <th>
+                            <i class="fas fa-map-marker-alt" style="margin-right: 0.5rem;"></i>Place
+                        </th>
+                        <th>
+                            <i class="fas fa-tint" style="margin-right: 0.5rem;"></i>Blood Group
+                        </th>
+                        <th>
+                            <i class="fas fa-venus-mars" style="margin-right: 0.5rem;"></i>Gender
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for donor in page_obj %}
+                    <tr {% if donor.user.username != request.session.username %}onclick="requestDonor({{ donor.id }})"{% endif %} 
+                        {% if donor.is_eligible %} style="background-color: rgb(234, 255, 233);" {% else %} style="background-color: rgb(246, 225, 225);" {% endif %}
+                    >
+                        <td>
+                            <strong>{{ donor.user.username }}</strong>
+                        </td>
+                            <td>
+                                <i class="fas fa-location-dot" style="color: #dc143c; margin-right: 0.5rem;"></i>
+                                {{ donor.address }}
+                            </td>
+                            <td>
+                                <span class="blood-type">{{ donor.blood_type }}</span>
+                            </td>
+                            <td>
+                                {% if donor.gender == 'Male' %}
+                                    <i class="fas fa-mars gender-icon male"></i>
+                                {% elif donor.gender == 'Female' %}
+                                    <i class="fas fa-venus gender-icon female"></i>
+                                {% else %}
+                                    <i class="fas fa-genderless gender-icon"></i>
+                                {% endif %}
+                                {{ donor.gender }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="no-data">
+                                <i class="fas fa-search" style="font-size: 2rem; color: #dc143c; margin-bottom: 1rem; display: block;"></i>
+                                <strong>No donors found</strong><br>
+                                <small>Try adjusting your search criteria</small>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination Links -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&place={{ selected_place }}">
+                    <i class="fas fa-chevron-left" style="margin-right: 0.5rem;"></i>Previous
+                </a>
+            {% endif %}
+            
+            <span>
+                <i class="fas fa-file-alt" style="margin-right: 0.5rem; color: #dc143c;"></i>
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&place={{ selected_place }}">
+                    Next<i class="fas fa-chevron-right" style="margin-left: 0.5rem;"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+{% endblock %}
