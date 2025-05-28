@@ -24,24 +24,29 @@ def wait_for_db():
     
     try:
         parsed_url = urlparse(db_url)
-        # Resolve host to IPv4 address
         host = parsed_url.hostname
+        # Try to resolve host to IPv4
+        hostaddr = None
         try:
             hostaddr = socket.getaddrinfo(host, None, socket.AF_INET)[0][4][0]
+            print(f"Resolved host {host} to IPv4: {hostaddr}")
         except socket.gaierror as e:
-            print(f"Failed to resolve host {host} to IPv4: {str(e)}")
-            sys.exit(1)
+            print(f"Could not resolve host {host} to IPv4: {str(e)}. Falling back to default host resolution.")
         
+        # Base connection parameters
         db_params = {
             'host': host,
-            'hostaddr': hostaddr,  # Force IPv4
             'port': parsed_url.port or 5432,
             'user': parsed_url.username,
             'password': parsed_url.password,
             'dbname': parsed_url.path.lstrip('/'),
             'sslmode': 'require'  # Required for Supabase
         }
-        print(f"Attempting to connect to database: host={db_params['host']}, hostaddr={db_params['hostaddr']}, port={db_params['port']}, dbname={db_params['dbname']}")
+        # Add hostaddr if IPv4 resolution succeeded
+        if hostaddr:
+            db_params['hostaddr'] = hostaddr
+        
+        print(f"Attempting to connect to database: host={db_params['host']}, port={db_params['port']}, dbname={db_params['dbname']}, sslmode={db_params['sslmode']}")
         
         max_attempts = 30
         attempt = 1
