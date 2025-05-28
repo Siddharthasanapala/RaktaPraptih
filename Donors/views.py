@@ -1,5 +1,5 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from apps.accounts.models import *
+from accounts.models import *
 from .forms import DonorUpdateForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator

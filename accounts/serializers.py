@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.accounts.utils import create_jwt_pair_for_user
+from accounts.utils import create_jwt_pair_for_user
 from .models import CustomUser , Donor , BloodBank , BloodBankBloods
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password

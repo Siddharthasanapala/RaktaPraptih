@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=RaktaPraptih.settings
 
 # Set work directory
 WORKDIR /app
@@ -16,21 +17,26 @@ RUN apt-get update \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt /app/
-COPY requirements/ /app/requirements/
-
 # Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project
 COPY . /app/
 
-COPY start.sh .
-RUN chmod +x start.sh
+# Create staticfiles directory
+RUN mkdir -p /app/staticfiles
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Create a non-root user
+RUN adduser --disabled-password --gecos '' appuser
+RUN chown -R appuser:appuser /app
+USER appuser
 
 # Expose port
-EXPOSE 10000
+EXPOSE 8000
 
-CMD ["./start.sh"]
+# Run the application
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "RaktaPraptih.wsgi:application"]

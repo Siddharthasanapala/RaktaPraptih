@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from apps.accounts.models import Donor
+from accounts.models import Donor
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
