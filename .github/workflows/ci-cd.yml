@@ -140,7 +140,11 @@ jobs:
           sleep 1
         done
         # Run migrations inside the app container to set up the database
-        docker run --rm --network test-network docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
+        docker run --rm --network test-network \
+          -e SECRET_KEY=test-key \
+          -e DEBUG=False \
+          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih \
+          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
         # Start the application container
         docker run --rm -d --name test-container --network test-network \
           -e SECRET_KEY=test-key \
