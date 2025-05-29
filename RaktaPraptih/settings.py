@@ -131,9 +131,14 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
-    }
+    db_config = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    if os.environ.get('CI') == 'true':
+        db_config['OPTIONS'] = db_config.get('OPTIONS', {})
+        db_config['OPTIONS']['sslmode'] = 'disable'
+    else:
+        db_config['OPTIONS'] = db_config.get('OPTIONS', {})
+        db_config['OPTIONS']['sslmode'] = 'require'
+    DATABASES = {'default': db_config}
 else:
     DATABASES = {
         'default': {
