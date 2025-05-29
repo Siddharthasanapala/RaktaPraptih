@@ -158,16 +158,23 @@ jobs:
         # Wait for the application to start with retries (5 seconds, 20 attempts)
         attempt=1
         max_attempts=20
-        until curl -f http://127.0.0.1:8000/; do
-          if [ $attempt -ge $max_attempts ]; then
-            echo "Application failed to start after $max_attempts attempts. Exiting..."
-            exit 1
+        success=false
+        while [ $attempt -le $max_attempts ]; do
+          echo "Checking application availability... ($attempt/$max_attempts)"
+          if curl -f http://127.0.0.1:8000/; then
+            echo "Application started successfully!"
+            success=true
+            break
+          else
+            echo "Application not yet available."
           fi
-          echo "Waiting for application to start... ($attempt/$max_attempts)"
           sleep 5
           attempt=$((attempt + 1))
         done
-        echo "Application started successfully!"
+        if [ "$success" != "true" ]; then
+          echo "Application failed to start after $max_attempts attempts. Exiting..."
+          exit 1
+        fi
         # Clean up
         docker stop test-container test-postgres
         docker network rm test-network
@@ -183,19 +190,26 @@ jobs:
       if: success()
       run: |
         # Replace with your Render app URL
-        RENDER_APP_URL="https://raktapraptih-latest.onrender.com"
+        RENDER_APP_URL="https://raktapraptih-latest.onrender.com
         attempt=1
         max_attempts=20
-        until curl -f "$RENDER_APP_URL"; do
-          if [ $attempt -ge $max_attempts ]; then
-            echo "Render deployment failed to become available after $max_attempts attempts. Exiting..."
-            exit 1
+        success=false
+        while [ $attempt -le $max_attempts ]; do
+          echo "Checking Render deployment availability... ($attempt/$max_attempts)"
+          if curl -f "$RENDER_APP_URL"; then
+            echo "Render deployment is ready!"
+            success=true
+            break
+          else
+            echo "Render deployment not yet available."
           fi
-          echo "Waiting for Render deployment to be ready... ($attempt/$max_attempts)"
           sleep 5
           attempt=$((attempt + 1))
         done
-        echo "Render deployment is ready!"
+        if [ "$success" != "true" ]; then
+          echo "Render deployment failed to become available after $max_attempts attempts. Exiting..."
+          exit 1
+        fi
 
   security-scan:
     runs-on: ubuntu-latest
