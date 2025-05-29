@@ -156,7 +156,7 @@ jobs:
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
         # Wait for the application to start
-        sleep 10
+        sleep 100
         # Test the application
         curl -f http://localhost:8000/admin/ || exit 1
         # Clean up
