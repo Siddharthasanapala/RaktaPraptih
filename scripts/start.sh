@@ -47,7 +47,9 @@ def wait_for_db():
             db_params['hostaddr'] = hostaddr
         
         print(f"Attempting to connect to database: host={db_params['host']}, port={db_params['port']}, dbname={db_params['dbname']}, sslmode={db_params['sslmode']}")
-        
+        if db_params['host']=='test-postgres':
+            db_params['sslmode']='disable'
+
         max_attempts = 30
         attempt = 1
         db_conn = None
