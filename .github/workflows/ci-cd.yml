@@ -65,7 +65,7 @@ jobs:
         echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
         echo "DB_HOST=localhost" >> $GITHUB_ENV
         echo "DB_PORT=5432" >> $GITHUB_ENV
-        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_raktapraptih" >> $GITHUB_ENV
+        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_raktapraptih?sslmode=disable" >> $GITHUB_ENV
 
     - name: Run security checks with Bandit
       run: |
@@ -143,13 +143,13 @@ jobs:
         docker run --rm --network test-network \
           -e SECRET_KEY=test-key \
           -e DEBUG=False \
-          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih \
+          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
         # Start the application container
         docker run --rm -d --name test-container --network test-network \
           -e SECRET_KEY=test-key \
           -e DEBUG=False \
-          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih \
+          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
         # Wait for the application to start
