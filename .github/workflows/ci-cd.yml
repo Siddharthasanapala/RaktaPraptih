@@ -35,7 +35,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Fetch full Git history for Codecov
+        fetch-depth: 0
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
@@ -65,6 +65,7 @@ jobs:
         echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
         echo "DB_HOST=localhost" >> $GITHUB_ENV
         echo "DB_PORT=5432" >> $GITHUB_ENV
+        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_raktapraptih" >> $GITHUB_ENV
 
     - name: Run security checks with Bandit
       run: |
@@ -90,14 +91,14 @@ jobs:
         coverage report
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5  # Updated to v5
+      uses: codecov/codecov-action@v5
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-        token: ${{ secrets.CODECOV_TOKEN }}  # Add Codecov token
-        fail_ci_if_error: true  # Fail the pipeline if upload fails
-        verbose: true  # Enable verbose logging for debugging
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+        verbose: true
 
   build-and-deploy:
     needs: test
@@ -110,21 +111,50 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
       run: |
-        docker build -t raktapraptih:latest .
+        docker build -t docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} .
+        docker push docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
+        # Tag the image as latest for easier reference
+        docker tag docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:latest
+        docker push docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:latest
 
     - name: Test Docker image
       run: |
-        docker run --rm -d --name test-container \
+        # Create a Docker network for communication between containers
+        docker network create test-network
+        # Start PostgreSQL container
+        docker run --rm -d --name test-postgres --network test-network -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=test_raktapraptih postgres:15
+        # Wait for PostgreSQL to be ready
+        for i in {1..30}; do
+          if docker exec test-postgres pg_isready -U postgres; then
+            break
+          fi
+          echo "Waiting for PostgreSQL to be ready... ($i/30)"
+          sleep 1
+        done
+        # Run migrations inside the app container to set up the database
+        docker run --rm --network test-network docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
+        # Start the application container
+        docker run --rm -d --name test-container --network test-network \
           -e SECRET_KEY=test-key \
           -e DEBUG=False \
-          -e DATABASE_URL=sqlite:///db.sqlite3 \
+          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih \
           -p 8000:8000 \
-          raktapraptih:latest
+          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
+        # Wait for the application to start
         sleep 10
+        # Test the application
         curl -f http://localhost:8000/admin/ || exit 1
-        docker stop test-container
+        # Clean up
+        docker stop test-container test-postgres
+        docker network rm test-network
 
     - name: Deploy to Render
       if: success()

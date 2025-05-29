@@ -42,6 +42,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'raktapraptih.onrender.com',
+    'raktapraptih-latest.onrender.com',
     '.render.com', 
     os.environ.get('ALLOWED_HOST', ''),
 ]
@@ -128,14 +129,18 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-
-DATABASES = {
-    
-}
-
-DATABASES = {
-    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-}
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'db.sqlite3',
+        }
+    }
 
 
 # Password validation

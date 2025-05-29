@@ -8,6 +8,7 @@ class IntegrationTestCase(APITestCase):
     def setUp(self):
         self.client = Client()
         self.user = CustomUser.objects.create_user(
+            username='pavan',
             email='pavan@gmail.com',
             password='1234'
         )
