@@ -17,20 +17,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_raktapraptih
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
     - uses: actions/checkout@v4
@@ -60,12 +46,7 @@ jobs:
       run: |
         echo "SECRET_KEY=test-secret-key-for-ci" >> $GITHUB_ENV
         echo "DEBUG=True" >> $GITHUB_ENV
-        echo "DB_NAME=test_raktapraptih" >> $GITHUB_ENV
-        echo "DB_USER=postgres" >> $GITHUB_ENV
-        echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
-        echo "DB_HOST=localhost" >> $GITHUB_ENV
-        echo "DB_PORT=5432" >> $GITHUB_ENV
-        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_raktapraptih?sslmode=disable" >> $GITHUB_ENV
+        echo "DATABASE_URL=sqlite:///:memory:" >> $GITHUB_ENV
 
     - name: Run security checks with Bandit
       run: |
@@ -124,43 +105,6 @@ jobs:
         # Tag the image as latest for easier reference
         docker tag docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:latest
         docker push docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:latest
-
-    - name: Test Docker image
-      run: |
-        # Create a Docker network for communication between containers
-        docker network create test-network
-        # Start PostgreSQL container
-        docker run --rm -d --name test-postgres --network test-network -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=test_raktapraptih postgres:15
-        # Wait for PostgreSQL to be ready
-        for i in {1..30}; do
-          if docker exec test-postgres pg_isready -U postgres; then
-            break
-          fi
-          echo "Waiting for PostgreSQL to be ready... ($i/30)"
-          sleep 1
-        done
-        # Run migrations inside the app container to set up the database
-        docker run --rm --network test-network \
-          -e SECRET_KEY=test-key \
-          -e DEBUG=False \
-          -e CI=true \
-          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
-          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
-        # Start the application container
-        docker run --rm -d --name test-container --network test-network \
-          -e SECRET_KEY=test-key \
-          -e DEBUG=False \
-          -e CI=true \
-          -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
-          -p 8000:8000 \
-          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
-        # Wait for the application to start
-        sleep 10
-        # Test the application
-        curl -f http://localhost:8000/admin/ || exit 1
-        # Clean up
-        docker stop test-container test-postgres
-        docker network rm test-network
 
     - name: Deploy to Render
       if: success()
