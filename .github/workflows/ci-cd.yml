@@ -34,6 +34,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full Git history for Codecov
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
@@ -88,11 +90,14 @@ jobs:
         coverage report
 
     - name: Upload coverage to Codecov
-      uses: actions/codecov-action@v3
+      uses: codecov/codecov-action@v5  # Updated to v5
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}  # Add Codecov token
+        fail_ci_if_error: true  # Fail the pipeline if upload fails
+        verbose: true  # Enable verbose logging for debugging
 
   build-and-deploy:
     needs: test
