@@ -131,7 +131,7 @@ main() {
         python manage.py runserver 0.0.0.0:8000
     else
         echo "🚀 Starting production server..."
-        exec gunicorn --bind 127.0.0.1:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
+        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
     fi
 }
 

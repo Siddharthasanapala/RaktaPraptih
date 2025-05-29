@@ -155,10 +155,19 @@ jobs:
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
-        # Wait for the application to start
-        sleep 10
-        # Test the application
-        curl -f http://127.0.0.1:8000/ || exit 1
+        # Wait for the application to start with retries (5 seconds, 20 attempts)
+        attempt=1
+        max_attempts=20
+        until curl -f http://127.0.0.1:8000/; do
+          if [ $attempt -ge $max_attempts ]; then
+            echo "Application failed to start after $max_attempts attempts. Exiting..."
+            exit 1
+          fi
+          echo "Waiting for application to start... ($attempt/$max_attempts)"
+          sleep 5
+          attempt=$((attempt + 1))
+        done
+        echo "Application started successfully!"
         # Clean up
         docker stop test-container test-postgres
         docker network rm test-network
@@ -169,6 +178,24 @@ jobs:
         curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
       env:
         RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+    - name: Verify Render Deployment
+      if: success()
+      run: |
+        # Replace with your Render app URL
+        RENDER_APP_URL="https://raktapraptih-latest.onrender.com"
+        attempt=1
+        max_attempts=20
+        until curl -f "$RENDER_APP_URL"; do
+          if [ $attempt -ge $max_attempts ]; then
+            echo "Render deployment failed to become available after $max_attempts attempts. Exiting..."
+            exit 1
+          fi
+          echo "Waiting for Render deployment to be ready... ($attempt/$max_attempts)"
+          sleep 5
+          attempt=$((attempt + 1))
+        done
+        echo "Render deployment is ready!"
 
   security-scan:
     runs-on: ubuntu-latest
