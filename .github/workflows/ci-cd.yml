@@ -156,7 +156,9 @@ jobs:
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
         # Wait for the application to start
-        sleep 5
+        sleep 10
+        # Test the application
+        curl -f http://localhost:8000/admin/ || exit 1
         # Clean up
         docker stop test-container test-postgres
         docker network rm test-network
