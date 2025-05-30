@@ -132,6 +132,8 @@ main() {
     else
         echo "🚀 Starting production server..."
         exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
+        sleep 2
+        echo "✅ Your production is accepting connections!"
     fi
 }
 
