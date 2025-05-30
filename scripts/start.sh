@@ -124,6 +124,11 @@ main() {
     create_superuser
     
     echo "🎉 Application startup completed successfully!"
+    if ! command -v procps &> /dev/null; then
+        echo "🔧 Installing procps..."
+        apt-get update && apt-get install -y procps
+        echo "procps Installiation completed..."
+    fi
 
     if [ "$1" = "dev" ]; then
         echo "🔧 Starting development server..."
