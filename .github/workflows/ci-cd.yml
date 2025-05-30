@@ -158,18 +158,20 @@ jobs:
             -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
             -p 8000:8000 \
             docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
-          sleep 10
+          sleep 20
           # Stop and remove containers if they exist
           if docker ps -a --filter "name=test-container" --format "{{.Names}}" | grep -q "test-container"; then
             docker stop -t 5 test-container && docker rm test-container
           else
             echo "test-container not found, skipping..."
           fi
+          sleep 20
           if docker ps -a --filter "name=test-postgres" --format "{{.Names}}" | grep -q "test-postgres"; then
             docker stop -t 5 test-postgres && docker rm test-postgres
           else
             echo "test-postgres not found, skipping..."
           fi
+          sleep 20
           # Remove network if it exists
           if docker network ls --filter "name=test-network" --format "{{.Name}}" | grep -q "test-network"; then
             docker network rm test-network
