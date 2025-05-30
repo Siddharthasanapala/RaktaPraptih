@@ -130,7 +130,15 @@ main() {
         python manage.py runserver 0.0.0.0:8000
     else
         echo "🚀 Starting production server..."
-        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application
+        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application &
+        sleep 2
+        if pgrep -f "gunicorn.*RaktaPraptih.wsgi:application" > /dev/null; then
+            echo "Gunicorn started successfully"
+            exit 0
+        else
+            echo "Error: Gunicorn failed to start"
+            exit 1
+        fi
     fi
 }
 
