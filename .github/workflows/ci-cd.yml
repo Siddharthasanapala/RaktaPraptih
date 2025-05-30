@@ -165,13 +165,13 @@ jobs:
           else
             echo "test-container not found, skipping..."
           fi
-          sleep 40
+          sleep 100
           if docker ps -a --filter "name=test-postgres" --format "{{.Names}}" | grep -q "test-postgres"; then
             docker stop -t 5 test-postgres && docker rm test-postgres
           else
             echo "test-postgres not found, skipping..."
           fi
-          sleep 40
+          sleep 100
           # Remove network if it exists
           if docker network ls --filter "name=test-network" --format "{{.Name}}" | grep -q "test-network"; then
             docker network rm test-network
