@@ -158,7 +158,7 @@ jobs:
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} start
         sleep 10
         echo "📍 Application container logs:"
-        docker logs test-container
+        docker logs test-container --tail=50
         echo "📍 Testing application endpoint:"
         curl -f http://localhost:8000 || { echo "Application endpoint not reachable"; exit 1; }
         # Clean up with a short timeout to avoid hanging

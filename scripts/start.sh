@@ -130,9 +130,7 @@ main() {
         python manage.py runserver 0.0.0.0:8000
     else
         echo "🚀 Starting production server..."
-        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application &
-        echo "Gunicorn started in background (PID: $!)." &
-        tail -f /dev/null
+        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application
     fi
 }
 
