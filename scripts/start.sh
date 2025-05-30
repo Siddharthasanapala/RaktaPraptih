@@ -124,7 +124,11 @@ main() {
     create_superuser
     
     echo "🎉 Application startup completed successfully!"
-
+    if ! command -v curl &> /dev/null; then
+        echo "🔧 Installing curl..."
+        apt-get update && apt-get install -y curl
+    fi
+    
     if [ "$1" = "dev" ]; then
         echo "🔧 Starting development server..."
         python manage.py runserver 0.0.0.0:8000
