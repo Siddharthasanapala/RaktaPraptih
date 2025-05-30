@@ -161,15 +161,27 @@ jobs:
         sleep 10
         
         steps:
-        - name: Stop and remove containers if they exist
-          run: |
-            docker ps -a --filter "name=test-container" --format "{{.Names}}" | grep -q "test-container" && docker stop -t 5 test-container && docker rm test-container || echo "test-container not found, skipping..."
-            docker ps -a --filter "name=test-postgres" --format "{{.Names}}" | grep -q "test-postgres" && docker stop -t 5 test-postgres && docker rm test-postgres || echo "test-postgres not found, skipping..."
+          - name: Stop and remove containers if they exist
+            run: |
+              if docker ps -a --filter "name=test-container" --format "{{.Names}}" | grep -q "test-container"; then
+                docker stop -t 5 test-container && docker rm test-container
+              else
+                echo "test-container not found, skipping..."
+              fi
 
-        - name: Remove network if it exists
-          run: |
-            docker network ls --filter "name=test-network" --format "{{.Name}}" | grep -q "test-network" && docker network rm test-network || echo "test-network not found, skipping..."
+              if docker ps -a --filter "name=test-postgres" --format "{{.Names}}"; then
+                docker stop -t 5 test-postgres && docker rm test-postgres
+              else
+                echo "test-postgres not found, skipping..."
+              fi
 
+          - name: Remove network if it exists
+            run: |
+              if docker network ls --filter "name=test-network" --format "{{.Name}}"; then
+                docker network rm test-network
+              else
+                echo "test-network not found, skipping..."
+              fi
     - name: Deploy to Render
       if: success()
       run: |
