@@ -147,6 +147,7 @@ jobs:
           -e CI=true \
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
+        sleep 100
         # Start the application container
         docker run --rm -d --name test-container --network test-network \
           -e SECRET_KEY=test-key \
@@ -155,8 +156,7 @@ jobs:
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
-        sleep 20        
-        
+        sleep 1000                
         # Clean up
         docker stop test-container test-postgres
         docker network rm test-network
