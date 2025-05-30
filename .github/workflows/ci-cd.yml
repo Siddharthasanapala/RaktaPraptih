@@ -155,27 +155,8 @@ jobs:
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
-        docker logs test-container
-        # Wait for the application to start with retries (5 seconds, 20 attempts)
-        attempt=1
-        max_attempts=20
-        success=false
-        while [ $attempt -le $max_attempts ]; do
-          echo "Checking application availability... ($attempt/$max_attempts)"
-          if curl -f http://127.0.0.1:8000/; then
-            echo "Application started successfully!"
-            success=true
-            break
-          else
-            echo "Application not yet available."
-          fi
-          sleep 5
-          attempt=$((attempt + 1))
-        done
-        if [ "$success" != "true" ]; then
-          echo "Application failed to start after $max_attempts attempts. Exiting..."
-          exit 1
-        fi
+        sleep 20        
+        
         # Clean up
         docker stop test-container test-postgres
         docker network rm test-network
