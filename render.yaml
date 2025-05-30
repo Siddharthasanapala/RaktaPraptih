@@ -4,9 +4,9 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-    startCommand: ./start.sh
+    dockerCommand: ""  # Use Dockerfile’s ENTRYPOINT
+    repo: https://github.com/Siddharthasanapala/RaktaPraptih.git
+    image: docker.io/siddhu136/raktapraptih:latest
     envVars:
       - key: SECRET_KEY
         generateValue: true
@@ -15,14 +15,16 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: RaktaPraptih.settings
       - key: DATABASE_URL
-        value: ${DATABASE_URL}  # Set this to your Supabase PostgreSQL connection string
+        value: false
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: ALLOWED_HOST
-        value: raktapraptih.onrender.com
+      - key: ALLOWED_HOSTS
+        value: raktapraptih-latest.onrender.com
       - key: DJANGO_SUPERUSER_USERNAME
         sync: false  # Set in Render dashboard
       - key: DJANGO_SUPERUSER_EMAIL
         sync: false  # Set in Render dashboard
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false  # Set in Render dashboard
+      - key: PORT
+        value: "8000"
