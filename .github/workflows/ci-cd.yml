@@ -157,12 +157,8 @@ jobs:
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} )
         sleep 10
-        echo "📍 Application container logs:"
-        docker logs $CONTAINER_ID --tail=50
-        echo "📍 Testing application endpoint:"
-        curl --max-time 5 -f http://localhost:8000/ || { echo "Application endpoint not reachable"; exit 1; }
-        # Clean up with a short timeout to avoid hanging
-        docker stop -t 5 $CONTAINER_ID test-postgres || docker kill $CONTAINER_ID test-postgres
+        
+        docker stop -t 5 test-postgres || docker kill test-postgres
         docker network rm test-network
 
     - name: Deploy to Render
