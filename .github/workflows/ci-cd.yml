@@ -161,8 +161,8 @@ jobs:
         docker logs test-container
         echo "📍 Testing application endpoint:"
         curl -f http://localhost:8000 || { echo "Application endpoint not reachable"; exit 1; }
-        # Clean up
-        docker stop test-container test-postgres
+        # Clean up with a short timeout to avoid hanging
+        docker stop -t 5 test-container test-postgres || docker kill test-container test-postgres
         docker network rm test-network
 
     - name: Deploy to Render

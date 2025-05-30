@@ -125,19 +125,21 @@ main() {
     
     echo "🎉 Application startup completed successfully!"
 
-    # Command-line logic:
-    # * If "dev" argument passed, start the Django dev server.
-    # * If "start" argument is passed, force production startup.
-    # * Otherwise, if running in CI mode, exit here (so CI jobs don't hang).
     if [ "$1" = "dev" ]; then
         echo "🔧 Starting development server..."
         python manage.py runserver 0.0.0.0:8000
     elif [ "$1" = "start" ]; then
-        echo "🚀 [Arg start] Forcing production server startup..."
-        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
+        echo "🚀 [Arg 'start'] Forcing production server startup..."
+        # Start Gunicorn in the background.
+        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application &
+        echo "Gunicorn started in background (PID: $!)."
+        # Return control immediately while keeping the container alive.
+        tail -f /dev/null
     else
         echo "🚀 Starting production server..."
-        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
+        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application &
+        echo "Gunicorn started in background (PID: $!)."
+        tail -f /dev/null
     fi
 }
 
