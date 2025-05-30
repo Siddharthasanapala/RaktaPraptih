@@ -128,6 +128,8 @@ jobs:
 
     - name: Test Docker image
       run: |
+        sudo apt-get update
+        sudo apt-get install -y curl
         # Create a Docker network for communication between containers
         docker network create test-network
         # Start PostgreSQL container
@@ -149,13 +151,13 @@ jobs:
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
         sleep 10
         # Start the application container
-        CONTAINER_ID=$(docker run --rm -d --name test-container --network test-network \
+        docker run --rm -d --name test-container --network test-network \
           -e SECRET_KEY=test-key \
           -e DEBUG=False \
           -e CI=true \
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
-          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} )
+          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
         sleep 10
         
         docker stop -t 5 test-postgres || docker kill test-postgres
