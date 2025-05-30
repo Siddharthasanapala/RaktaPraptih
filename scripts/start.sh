@@ -5,7 +5,7 @@ set -e
 
 echo "🚀 Starting RaktaPraptih application..."
 
-# Function to wait for database to be ready
+# Function to wait for the database to be ready (unchanged)
 wait_for_db() {
     echo "⏳ Waiting for database to be ready..."
     python << END
@@ -109,9 +109,9 @@ END
     fi
 }
 
-# Main execution
+# Main execution function
 main() {
-    # Wait for database
+    # Wait for the database
     wait_for_db
     
     # Run migrations
@@ -124,18 +124,26 @@ main() {
     create_superuser
     
     echo "🎉 Application startup completed successfully!"
-    
-    # Start the application
+
+    # Command-line logic:
+    # * If "dev" argument passed, start the Django dev server.
+    # * If "start" argument is passed, force production startup.
+    # * Otherwise, if running in CI mode, exit here (so CI jobs don't hang).
     if [ "$1" = "dev" ]; then
         echo "🔧 Starting development server..."
         python manage.py runserver 0.0.0.0:8000
+    elif [ "$1" = "start" ]; then
+        echo "🚀 [Arg start] Forcing production server startup..."
+        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
     else
+        if [ "$CI" = "true" ]; then
+            echo "⚙️ CI mode detected; initialization complete. Exiting without starting the server."
+            exit 0
+        fi
         echo "🚀 Starting production server..."
         exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
-        sleep 2
-        echo "✅ Your production is accepting connections!"
     fi
 }
 
-# Run main function
+# Run main function with provided arguments
 main "$@"

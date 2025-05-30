@@ -156,10 +156,11 @@ jobs:
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
-        sleep 10            
-        echo "📍 In container - Starting application"
-        exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application
-    
+        sleep 10
+        echo "📍 Application container logs:"
+        docker logs test-container
+        echo "📍 Testing application endpoint:"
+        curl -f http://localhost:8000 || { echo "Application endpoint not reachable"; exit 1; }
         # Clean up
         docker stop test-container test-postgres
         docker network rm test-network
