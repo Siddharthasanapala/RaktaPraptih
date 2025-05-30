@@ -1,1 +1,1 @@
-scripts/start.sh text eol=lf
+*.sh text eol=lfscripts/start.sh text eol=lf
