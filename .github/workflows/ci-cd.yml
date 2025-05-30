@@ -66,7 +66,7 @@ jobs:
         echo "DB_HOST=localhost" >> $GITHUB_ENV
         echo "DB_PORT=5432" >> $GITHUB_ENV
         echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_raktapraptih?sslmode=disable" >> $GITHUB_ENV
-        echo "CI=true" >> $GITHUB_ENV
+        echo "CI=false" >> $GITHUB_ENV
 
     - name: Run security checks with Bandit
       run: |
@@ -144,7 +144,7 @@ jobs:
         docker run --rm --network test-network \
           -e SECRET_KEY=test-key \
           -e DEBUG=False \
-          -e CI=true \
+          -e CI=false \
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
         sleep 100
