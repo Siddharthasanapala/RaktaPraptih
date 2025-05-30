@@ -174,7 +174,7 @@ jobs:
           # Replace with your Render app URL
           RENDER_APP_URL="https://raktapraptih-latest.onrender.com"
           attempt=1
-          max_attempts=20
+          max_attempts=40
           success=false
           while [ $attempt -le $max_attempts ]; do
             echo "Checking Render deployment availability... ($attempt/$max_attempts)"
@@ -185,7 +185,7 @@ jobs:
             else
               echo "Render deployment not yet available."
             fi
-            sleep 5
+            sleep 10
             attempt=$((attempt + 1))
           done
           if [ "$success" != "true" ]; then
