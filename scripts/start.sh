@@ -136,10 +136,6 @@ main() {
         echo "🚀 [Arg start] Forcing production server startup..."
         exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
     else
-        if [ "$CI" = "true" ]; then
-            echo "⚙️ CI mode detected; initialization complete. Exiting without starting the server."
-            exit 0
-        fi
         echo "🚀 Starting production server..."
         exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application 
     fi
