@@ -160,8 +160,15 @@ jobs:
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
         sleep 10
         
-        docker stop -t 5 test-postgres || docker kill test-postgres
-        docker network rm test-network
+        steps:
+        - name: Stop and remove containers if they exist
+          run: |
+            docker ps -a --filter "name=test-container" --format "{{.Names}}" | grep -q "test-container" && docker stop -t 5 test-container && docker rm test-container || echo "test-container not found, skipping..."
+            docker ps -a --filter "name=test-postgres" --format "{{.Names}}" | grep -q "test-postgres" && docker stop -t 5 test-postgres && docker rm test-postgres || echo "test-postgres not found, skipping..."
+
+        - name: Remove network if it exists
+          run: |
+            docker network ls --filter "name=test-network" --format "{{.Name}}" | grep -q "test-network" && docker network rm test-network || echo "test-network not found, skipping..."
 
     - name: Deploy to Render
       if: success()
