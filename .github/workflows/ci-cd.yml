@@ -147,22 +147,22 @@ jobs:
           -e CI=true \
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
-        sleep 100
+        sleep 10
         # Start the application container
-        docker run --rm -d --name test-container --network test-network \
+        CONTAINER_ID=$(docker run --rm -d --name test-container --network test-network \
           -e SECRET_KEY=test-key \
           -e DEBUG=False \
           -e CI=true \
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
-          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} start
+          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} )
         sleep 10
         echo "📍 Application container logs:"
-        docker logs test-container --tail=50
+        docker logs $CONTAINER_ID --tail=50
         echo "📍 Testing application endpoint:"
-        curl -f http://localhost:8000 || { echo "Application endpoint not reachable"; exit 1; }
+        curl --max-time 5 -f http://localhost:8000/ || { echo "Application endpoint not reachable"; exit 1; }
         # Clean up with a short timeout to avoid hanging
-        docker stop -t 5 test-container test-postgres || docker kill test-container test-postgres
+        docker stop -t 5 $CONTAINER_ID test-postgres || docker kill $CONTAINER_ID test-postgres
         docker network rm test-network
 
     - name: Deploy to Render
