@@ -132,7 +132,7 @@ main() {
         echo "🚀 Starting production server..."
         exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application &
         sleep 20
-        if pgrep -q -f "gunicorn.*RaktaPraptih.wsgi:application"; then
+        if curl --silent --fail http://127.0.0.1:${PORT:-8000}; then
             echo "Gunicorn started successfully"
             exit 0
         else
