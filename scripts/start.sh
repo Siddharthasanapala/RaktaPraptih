@@ -124,19 +124,15 @@ main() {
     create_superuser
     
     echo "🎉 Application startup completed successfully!"
-    if ! command -v curl &> /dev/null; then
-        echo "🔧 Installing curl..."
-        apt-get update && apt-get install -y curl
-    fi
-    
+
     if [ "$1" = "dev" ]; then
         echo "🔧 Starting development server..."
         python manage.py runserver 0.0.0.0:8000
     else
         echo "🚀 Starting production server..."
         exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application &
-        sleep 20
-        if curl --silent --fail http://127.0.0.1:${PORT:-8000}; then
+        sleep 10
+        if pgrep -f "gunicorn.*RaktaPraptih.wsgi:application"; then
             echo "Gunicorn started successfully"
             exit 0
         else
