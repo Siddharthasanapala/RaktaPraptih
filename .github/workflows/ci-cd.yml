@@ -155,7 +155,7 @@ jobs:
           -e CI=true \
           -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
           -p 8000:8000 \
-          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
+          docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} start
         sleep 10
         echo "📍 Application container logs:"
         docker logs test-container
