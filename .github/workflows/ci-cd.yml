@@ -126,16 +126,18 @@ jobs:
             -e CI=true \
             -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
             docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
-          # Run container and wait for start.sh to exit
+          # Run container without --rm for debugging
           docker run -d --name test-container --network test-network \
             -e SECRET_KEY=test-key \
             -e DEBUG=False \
             -e CI=true \
             -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
             -e PORT=8000 \
+            -e ALLOWED_HOSTS=localhost \
             -p 8000:8000 \
             docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
-          sleep 5
+          # Wait for Gunicorn to stabilize
+          sleep 10
           # Health check with retries
           curl --fail --retry 5 --retry-delay 3 http://localhost:8000 || { echo "Health check failed"; docker logs test-container; docker stop test-container; exit 1; }
           # Clean up

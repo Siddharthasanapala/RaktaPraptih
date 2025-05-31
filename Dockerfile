@@ -36,7 +36,7 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Expose port
-EXPOSE 8000
+EXPOSE 10000 8000
 
 # Use startup script as entrypoint
 ENTRYPOINT ["/app/scripts/start.sh"]

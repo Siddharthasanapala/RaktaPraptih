@@ -167,11 +167,12 @@ main() {
         python manage.py runserver 0.0.0.0:8000
     elif [ "$CI" = "true" ]; then
         echo "🚀 Starting production server in CI mode..."
-        # Start Gunicorn in background with logging
-        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application --daemon --log-file /tmp/gunicorn.log
+        # Start Gunicorn in background with detailed logging
+        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 90 --log-level debug --log-file /tmp/gunicorn.log RaktaPraptih.wsgi:application --daemon
         # Verify Gunicorn is running
         verify_gunicorn_curl ${PORT:-8000} || verify_gunicorn_netstat ${PORT:-8000} || { echo "Gunicorn startup failed"; cat /tmp/gunicorn.log; exit 1; }
         echo "✅ CI test completed, exiting..."
+        cat /tmp/gunicorn.log || true
         exit 0
     else
         echo "🚀 Starting production server..."
