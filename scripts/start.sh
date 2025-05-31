@@ -25,7 +25,6 @@ def wait_for_db():
     try:
         parsed_url = urlparse(db_url)
         host = parsed_url.hostname
-        # Try to resolve host to IPv4
         hostaddr = None
         try:
             hostaddr = socket.getaddrinfo(host, None, socket.AF_INET)[0][4][0]
@@ -33,16 +32,14 @@ def wait_for_db():
         except socket.gaierror as e:
             print(f"Could not resolve host {host} to IPv4: {str(e)}. Falling back to default host resolution.")
         
-        # Base connection parameters
         db_params = {
             'host': host,
             'port': parsed_url.port or 5432,
             'user': parsed_url.username,
             'password': parsed_url.password,
             'dbname': parsed_url.path.lstrip('/'),
-            'sslmode': 'require'  # Required for Supabase
+            'sslmode': 'require'
         }
-        # Add hostaddr if IPv4 resolution succeeded
         if hostaddr:
             db_params['hostaddr'] = hostaddr
         
@@ -129,7 +126,7 @@ verify_gunicorn_curl() {
     return 1
 }
 
-# Alternative function to verify Gunicorn is running (using netstat, no curl)
+# Alternative function to verify Gunicorn is running (using netstat)
 verify_gunicorn_netstat() {
     local port=$1
     local max_attempts=10
@@ -170,10 +167,10 @@ main() {
         python manage.py runserver 0.0.0.0:8000
     elif [ "$CI" = "true" ]; then
         echo "🚀 Starting production server in CI mode..."
-        # Start Gunicorn in background
-        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application --daemon
-        # Verify Gunicorn is running (try curl, fall back to netstat)
-        verify_gunicorn_curl ${PORT:-8000} || verify_gunicorn_netstat ${PORT:-8000} || { echo "Gunicorn startup failed"; exit 1; }
+        # Start Gunicorn in background with logging
+        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application --daemon --log-file /tmp/gunicorn.log
+        # Verify Gunicorn is running
+        verify_gunicorn_curl ${PORT:-8000} || verify_gunicorn_netstat ${PORT:-8000} || { echo "Gunicorn startup failed"; cat /tmp/gunicorn.log; exit 1; }
         echo "✅ CI test completed, exiting..."
         exit 0
     else
