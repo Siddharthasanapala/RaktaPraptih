@@ -136,13 +136,13 @@ jobs:
             -p 8000:8000 \
             docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
           # Wait for Gunicorn to start
-          sleep 10
+          sleep 15
           # Health check
           curl --fail http://localhost:8000 || { echo "Health check failed"; docker logs test-container; exit 1; }
           # Clean up
-          docker stop test-container
-          docker stop test-postgres
-          docker network rm test-network
+          docker stop test-container || true
+          docker stop test-postgres || true
+          docker network rm test-network || true
       - name: Deploy to Render
         if: success()
         run: |
