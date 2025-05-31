@@ -86,4 +86,3 @@ jobs:
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          vestep completes without hanging.
