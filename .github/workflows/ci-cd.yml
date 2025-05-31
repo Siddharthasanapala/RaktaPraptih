@@ -127,20 +127,20 @@ jobs:
             -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
             docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }} python manage.py migrate --noinput
           # Start container in detached mode
-          docker run --rm -d --name test-container --network test-network \
+          CONTAINER_ID=$(docker run --rm -d --name test-container --network test-network \
             -e SECRET_KEY=test-key \
             -e DEBUG=False \
             -e CI=true \
             -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
             -e PORT=8000 \
             -p 8000:8000 \
-            docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
+            docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }})
           # Wait for Gunicorn to start
           sleep 15
           # Health check
-          curl --fail http://localhost:8000 || { echo "Health check failed"; docker logs test-container; exit 1; }
+          curl --fail --retry 20 --retry-delay 5 http://localhost:8000 || { echo "Health check failed"; docker logs $CONTAINER_ID; exit 1; }
           # Clean up
-          docker stop test-container || true
+          docker stop $CONTAINER_ID || true
           docker stop test-postgres || true
           docker network rm test-network || true
       - name: Deploy to Render
