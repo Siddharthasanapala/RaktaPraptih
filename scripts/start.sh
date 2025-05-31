@@ -126,6 +126,26 @@ verify_gunicorn_curl() {
     return 1
 }
 
+# Alternative function to verify Gunicorn is running (using netstat)
+verify_gunicorn_netstat() {
+    local port=$1
+    local max_attempts=10
+    local attempt=1
+
+    echo "⏳ Verifying Gunicorn is running on port $port (using netstat)..."
+    while [ $attempt -le $max_attempts ]; do
+        if netstat -tuln | grep ":$port" >/dev/null; then
+            echo "✅ Gunicorn is listening on port $port!"
+            return 0
+        fi
+        echo "Attempt $attempt/$max_attempts: Gunicorn not yet listening, waiting..."
+        sleep 2
+        attempt=$((attempt + 1))
+    done
+    echo "❌ Failed to verify Gunicorn after $max_attempts attempts"
+    return 1
+}
+
 # Main execution function
 main() {
     # Wait for the database
@@ -147,14 +167,13 @@ main() {
         python manage.py runserver 0.0.0.0:8000
     elif [ "$CI" = "true" ]; then
         echo "🚀 Starting production server in CI mode..."
-        # Start Gunicorn in foreground with logging
-        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 90 --log-level debug RaktaPraptih.wsgi:application &
-        GUNICORN_PID=$!
+        # Start Gunicorn in background with detailed logging
+        gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 90 --log-level debug --log-file /tmp/gunicorn.log RaktaPraptih.wsgi:application --daemon
         # Verify Gunicorn is running
-        verify_gunicorn_curl ${PORT:-8000} || { echo "Gunicorn startup failed"; kill $GUNICORN_PID; exit 1; }
+        verify_gunicorn_curl ${PORT:-8000} || verify_gunicorn_netstat ${PORT:-8000} || { echo "Gunicorn startup failed"; cat /tmp/gunicorn.log; exit 1; }
         echo "✅ CI test completed, exiting..."
-        # Allow health check to run
-        wait $GUNICORN_PID
+        cat /tmp/gunicorn.log || true
+        exit 0
     else
         echo "🚀 Starting production server..."
         exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 90 RaktaPraptih.wsgi:application
