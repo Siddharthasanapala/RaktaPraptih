@@ -131,10 +131,11 @@ jobs:
             -e DEBUG=False \
             -e CI=true \
             -e DATABASE_URL=postgres://postgres:postgres@test-postgres:5432/test_raktapraptih?sslmode=disable \
+            -e PORT=8000 \
             -p 8000:8000 \
             docker.io/${{ secrets.DOCKER_USERNAME }}/raktapraptih:${{ github.sha }}
           sleep 10
-          curl --fail http://localhost:8000 || exit 1
+          curl --fail http://localhost:8000 || { echo "Health check failed"; docker logs test-container; exit 1; }
           docker stop test-container
           docker stop test-postgres
           docker network rm test-network
