@@ -231,32 +231,28 @@ if os.environ.get('SENTRY_DSN'):
         dsn=os.environ.get('SENTRY_DSN'),
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
-        send_default_pii=True
+        send_default_pii=True,
+        environment="production"
     )
     
 # Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'level': 'INFO',
+        },
+        'sentry': {
+            'level': 'WARNING',
+            'class': 'sentry_sdk.integrations.logging.SentryHandler',
         },
     },
-    'root': {
-        'handlers': ['console'],
-    },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        'raktapraptih': {
+            'handlers': ['console', 'sentry'],
+            'level': 'WARNING',
             'propagate': False,
         },
     },

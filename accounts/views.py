@@ -23,6 +23,8 @@ from django.utils import timezone
 from django.db.models import Q
 from datetime import timedelta
 import random
+from sentry_sdk import capture_message
+import logging
 
 User = get_user_model()
 
@@ -122,6 +124,7 @@ def home_view(request):
         'selected_place': selected_place,
         'blood_fields': blood_fields,  
     }
+    logger.info(f"User {request.user.username} accessed Homepage")
     return render(request, 'homepage.html', context)
 
 @never_cache
@@ -139,11 +142,14 @@ def login_view(request):
                 response = redirect('home')
                 response.set_cookie('access_token', tokens['access'], httponly=True)
                 response.set_cookie('refresh_token', tokens['refresh'], httponly=True)
+                logger.info(f"User {user.username} Login Successful")
                 return response
             else:
                 messages.error(request,"Entered wrong Crediantails please try again.")
+                logger.error(f"User Entered Wrong Crediantails to signin", exc_info=True)
 
     else:
+        logger.error(f"Login Form Entries are invalid", exc_info=True)
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
@@ -169,6 +175,7 @@ def donor_signup_view(request):
 
             tokens = create_jwt_pair_for_user(user)
             messages.success(request, "You have succeessfully registered as Donor.")
+            logger.info(f"Donor {user.username} Signup Successful")
             login(request, user)
             request.session['username'] = user.username
 
@@ -213,6 +220,7 @@ def bloodbank_signup_view(request):
             blood_bank_bloods.save()
             messages.success(request, "You have succeessfully registered in our Portal.")
             messages.info(request,"Update Blood units available in your Blood Bank from your account")
+            logger.info(f"BloodBank {user.username} Signup Successful")
             login(request, user)
             request.session['username'] = user.username
 
@@ -245,7 +253,7 @@ def bloodbank_detail_view(request, pk):
         'form': form,
         'blood_groups': blood_groups,
     }
-    
+    logger.info(f"User {request.user.username} interacted with blood bank {bloodbank.user.username}")
     return render(request, 'bloodbank_details.html', context)
 
 @never_cache
@@ -258,6 +266,7 @@ def bloodbank_update_view(request, bloodbank_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Your Blood Units are updated successfully.")
+            logger.info(f"User {request.user.username} updated BloodBank Blood Levels successfully")
             return redirect('bloodbank_detail', pk=bloodbank_id)
         else:
             return redirect('bloodbank_detail', pk=bloodbank_id)
@@ -295,6 +304,7 @@ def logout_view(request):
 
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
+    logger.info(f"User {request.user.username} Logged out")
     return response
 
 @never_cache
@@ -309,4 +319,5 @@ def landing_view(request):
         'bloodbanks_count':bloodbanks_count,
         'active_donors_count':active_donors_count
     }
+    logger.info(f"A User interacted with landing page")
     return render(request, 'landingpage.html',context)

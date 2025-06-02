@@ -12,7 +12,8 @@ from django.db.models import Q
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.decorators import api_view, throttle_classes
 from RaktaPraptih.throttles import DonorRequestRateThrottle
-
+from sentry_sdk import capture_message
+import logging
 import os
 from twilio.rest import Client
 
@@ -44,6 +45,7 @@ def donors_view(request):
         'selected_place': selected_place,
         'donors':donors,
     }
+    logger.info(f"User {request.user.username} interacted with Donors page")
     return render(request, 'donors_page.html', context)
     
     
@@ -60,7 +62,7 @@ def donor_details_view(request, donor_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Your details have been updated successfully!")
-            
+            logger.info(f"User {request.user.username} updated their details Successfully")
             if last_donation_date!=donor.last_donation_date:
                 if last_donation_date+timedelta(days=182) > donor.last_donation_date:
                     messages.warning(request,"Ensure 6 months gap beyween your successive donations for your better health.")
@@ -111,6 +113,7 @@ def donor_request_view(request,donor_id):
             messages.info(request, f"{donor.user.username} hasen't completed 6 months from his last donation but request is sent.")
         else:
             messages.success(request, "Your blood request has been sent successfully.")
+        logger.info(f"User {request.user.username} irequested {donor.user.username} for unit of blood")
         return redirect('donors_view') 
     context={
         'donor':donor,
