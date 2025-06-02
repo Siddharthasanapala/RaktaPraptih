@@ -26,6 +26,8 @@ import random
 from sentry_sdk import capture_message
 import logging
 
+logger = logging.getLogger('raktapraptih')
+
 User = get_user_model()
 
 @method_decorator(never_cache, name='dispatch')

@@ -17,6 +17,8 @@ import logging
 import os
 from twilio.rest import Client
 
+logger = logging.getLogger('raktapraptih')
+
 @never_cache
 @login_required
 def donors_view(request):
