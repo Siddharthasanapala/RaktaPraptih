@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ siddhu, develop ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ siddhu ]
+    branches: [ main ]
 
 permissions:
   actions: read
@@ -91,7 +91,7 @@ jobs:
   build-and-deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/siddhu' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
